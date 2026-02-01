@@ -22,7 +22,7 @@ dependencyResolutionManagement {
 
 // build.gradle.kts
 dependencies {
-    implementation("uz.yalla:media:1.0.0")
+    implementation("uz.yalla:media:1.0.1")
 }
 ```
 
