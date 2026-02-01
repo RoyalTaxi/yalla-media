@@ -13,7 +13,7 @@ import platform.UIKit.UIImageJPEGRepresentation
 import platform.UIKit.UIImagePickerController
 import platform.UIKit.UIImagePickerControllerDelegateProtocol
 import platform.UIKit.UIImagePickerControllerOriginalImage
-import platform.UIKit.UIImagePickerControllerSourceTypeCamera
+import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UIKit.UINavigationControllerDelegateProtocol
 import platform.UIKit.UISceneActivationStateForegroundActive
 import platform.UIKit.UIViewController
@@ -32,14 +32,15 @@ actual fun rememberSystemCameraLauncher(
     return remember {
         SystemCameraLauncher {
             scope.launch(Dispatchers.Main) {
-                if (!UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceTypeCamera)) {
+                val cameraSource = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
+                if (!UIImagePickerController.isSourceTypeAvailable(cameraSource)) {
                     onResult(null)
                     return@launch
                 }
 
                 val rootVC = getRootViewController() ?: return@launch
                 val picker = UIImagePickerController().apply {
-                    sourceType = UIImagePickerControllerSourceTypeCamera
+                    sourceType = cameraSource
                     allowsEditing = false
                     this.delegate = delegate
                 }
