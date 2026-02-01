@@ -15,7 +15,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -23,6 +25,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.Executors
 
 private val executor = Executors.newSingleThreadExecutor()
@@ -77,6 +80,46 @@ actual fun YallaCamera(
 
     when (permissionState.status) {
         PermissionStatus.Granted -> CameraWithGrantedPermission(state, modifier)
+        is PermissionStatus.Denied -> Box(modifier = modifier) { permissionDeniedContent() }
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+actual fun YallaCamera(
+    modifier: Modifier,
+    scope: CoroutineScope,
+    captureIcon: @Composable (onClick: () -> Unit) -> Unit,
+    progressIndicator: @Composable () -> Unit,
+    onCapture: (byteArray: ByteArray?) -> Unit,
+    permissionDeniedContent: @Composable () -> Unit
+) {
+    val permissionState = rememberPermissionState(permission = android.Manifest.permission.CAMERA)
+    var isLaunching by remember { mutableStateOf(false) }
+
+    val launcher =
+        rememberSystemCameraLauncher(scope) { bytes ->
+            isLaunching = false
+            onCapture(bytes)
+        }
+
+    LaunchedEffect(permissionState.status) {
+        if (permissionState.status is PermissionStatus.Denied) {
+            permissionState.launchPermissionRequest()
+        }
+    }
+
+    when (permissionState.status) {
+        PermissionStatus.Granted ->
+            Box(modifier = modifier) {
+                captureIcon {
+                    if (!isLaunching) {
+                        isLaunching = true
+                        launcher.launch()
+                    }
+                }
+                if (isLaunching) progressIndicator()
+            }
         is PermissionStatus.Denied -> Box(modifier = modifier) { permissionDeniedContent() }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.UIKitView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureDevicePositionFront
 import platform.AVFoundation.AVCapturePhotoOutput
@@ -77,6 +78,45 @@ actual fun YallaCamera(
     Box(modifier = modifier) {
         YallaCamera(state = state, modifier = modifier, permissionDeniedContent = permissionDeniedContent)
         CompatOverlay(Modifier.fillMaxSize(), state, captureIcon, convertIcon, progressIndicator)
+    }
+}
+
+@Composable
+actual fun YallaCamera(
+    modifier: Modifier,
+    scope: CoroutineScope,
+    captureIcon: @Composable (onClick: () -> Unit) -> Unit,
+    progressIndicator: @Composable () -> Unit,
+    onCapture: (byteArray: ByteArray?) -> Unit,
+    permissionDeniedContent: @Composable () -> Unit
+) {
+    var cameraAccess: CameraAccess by remember { mutableStateOf(CameraAccess.Undefined) }
+    var isLaunching by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        checkCameraPermission { cameraAccess = it }
+    }
+
+    val launcher =
+        rememberSystemCameraLauncher(scope) { bytes ->
+            isLaunching = false
+            onCapture(bytes)
+        }
+
+    Box(modifier = modifier) {
+        when (cameraAccess) {
+            CameraAccess.Undefined -> {}
+            CameraAccess.Denied -> Box(modifier = modifier) { permissionDeniedContent() }
+            CameraAccess.Authorized -> {
+                captureIcon {
+                    if (!isLaunching) {
+                        isLaunching = true
+                        launcher.launch()
+                    }
+                }
+                if (isLaunching) progressIndicator()
+            }
+        }
     }
 }
 
