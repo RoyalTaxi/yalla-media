@@ -88,10 +88,12 @@ actual fun YallaCamera(
     captureIcon: @Composable (onClick: () -> Unit) -> Unit,
     progressIndicator: @Composable () -> Unit,
     onCapture: (byteArray: ByteArray?) -> Unit,
-    permissionDeniedContent: @Composable () -> Unit
+    permissionDeniedContent: @Composable () -> Unit,
+    autoLaunch: Boolean = false
 ) {
     var cameraAccess: CameraAccess by remember { mutableStateOf(CameraAccess.Undefined) }
     var isLaunching by remember { mutableStateOf(false) }
+    var hasAutoLaunched by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         checkCameraPermission { cameraAccess = it }
@@ -102,6 +104,14 @@ actual fun YallaCamera(
             isLaunching = false
             onCapture(bytes)
         }
+
+    LaunchedEffect(cameraAccess, autoLaunch, hasAutoLaunched) {
+        if (cameraAccess == CameraAccess.Authorized && autoLaunch && !isLaunching && !hasAutoLaunched) {
+            isLaunching = true
+            hasAutoLaunched = true
+            launcher.launch()
+        }
+    }
 
     Box(modifier = modifier) {
         when (cameraAccess) {
