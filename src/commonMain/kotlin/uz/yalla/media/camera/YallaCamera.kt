@@ -30,5 +30,6 @@ expect fun YallaCamera(
     captureIcon: @Composable (onClick: () -> Unit) -> Unit,
     progressIndicator: @Composable () -> Unit = {},
     onCapture: (byteArray: ByteArray?) -> Unit,
-    permissionDeniedContent: @Composable () -> Unit = {}
+    permissionDeniedContent: @Composable () -> Unit = {},
+    autoLaunch: Boolean = false
 )

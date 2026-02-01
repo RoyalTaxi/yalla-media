@@ -92,10 +92,12 @@ actual fun YallaCamera(
     captureIcon: @Composable (onClick: () -> Unit) -> Unit,
     progressIndicator: @Composable () -> Unit,
     onCapture: (byteArray: ByteArray?) -> Unit,
-    permissionDeniedContent: @Composable () -> Unit
+    permissionDeniedContent: @Composable () -> Unit,
+    autoLaunch: Boolean
 ) {
     val permissionState = rememberPermissionState(permission = android.Manifest.permission.CAMERA)
     var isLaunching by remember { mutableStateOf(false) }
+    var hasAutoLaunched by remember { mutableStateOf(false) }
 
     val launcher =
         rememberSystemCameraLauncher(scope) { bytes ->
@@ -103,9 +105,14 @@ actual fun YallaCamera(
             onCapture(bytes)
         }
 
-    LaunchedEffect(permissionState.status) {
+    LaunchedEffect(permissionState.status, autoLaunch, hasAutoLaunched) {
         if (permissionState.status is PermissionStatus.Denied) {
             permissionState.launchPermissionRequest()
+        }
+        if (autoLaunch && permissionState.status is PermissionStatus.Granted && !isLaunching && !hasAutoLaunched) {
+            isLaunching = true
+            hasAutoLaunched = true
+            launcher.launch()
         }
     }
 

@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "uz.yalla"
-version = "1.0.2"
+version = "1.0.3"
 
 kotlin {
     targets.withType(KotlinNativeTarget::class.java).configureEach {
