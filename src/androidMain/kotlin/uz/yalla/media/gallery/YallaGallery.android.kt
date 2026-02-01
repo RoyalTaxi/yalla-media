@@ -33,7 +33,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import app.cash.paging.LoadState
+import app.cash.paging.LoadStateLoading
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -123,7 +123,7 @@ private fun GalleryContent(
     Column(modifier = Modifier.background(Color.Transparent)) {
         header()
 
-        if (images.loadState.refresh is LoadState.Loading && images.itemCount == 0) {
+        if (images.loadState.refresh is LoadStateLoading && images.itemCount == 0) {
             progressIndicator()
         } else {
             LazyVerticalGrid(
