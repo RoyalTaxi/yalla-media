@@ -55,7 +55,7 @@ actual fun rememberSystemCameraLauncher(
                 val uri = currentUri
                 if (uri == null) {
                     latestOnResult(null)
-                    markCameraInactive()
+                    launcher?.markCameraInactive()
                 } else {
                     activityLauncher.launch(uri)
                 }
