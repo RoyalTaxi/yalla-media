@@ -89,7 +89,7 @@ actual fun YallaCamera(
     progressIndicator: @Composable () -> Unit,
     onCapture: (byteArray: ByteArray?) -> Unit,
     permissionDeniedContent: @Composable () -> Unit,
-    autoLaunch: Boolean = false
+    autoLaunch: Boolean
 ) {
     var cameraAccess: CameraAccess by remember { mutableStateOf(CameraAccess.Undefined) }
     var isLaunching by remember { mutableStateOf(false) }

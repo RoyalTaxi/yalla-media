@@ -1,17 +1,18 @@
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.publish.maven.MavenPublication
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.multiplatform.library)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     `maven-publish`
 }
 
 group = "uz.yalla"
-version = "1.0.3"
+version = "1.0.5"
 
 kotlin {
     targets.withType(KotlinNativeTarget::class.java).configureEach {
@@ -29,10 +30,17 @@ kotlin {
         }
     }
 
-    androidTarget {
-        publishLibraryVariants("release")
+    targets.withType(KotlinMultiplatformAndroidLibraryTarget::class.java).configureEach {
+        namespace = "uz.yalla.media"
+        compileSdk = 36
+        minSdk = 26
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+        }
+
+        androidResources {
+            enable = true
         }
     }
 
@@ -66,20 +74,6 @@ kotlin {
             implementation(libs.camera.view)
             implementation(libs.kotlinx.coroutines.guava)
         }
-    }
-}
-
-android {
-    namespace = "uz.yalla.media"
-    compileSdk = 35
-
-    defaultConfig {
-        minSdk = 24
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
